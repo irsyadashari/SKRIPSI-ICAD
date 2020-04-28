@@ -1,0 +1,454 @@
+
+IMPORTANT COMMANDS :
+
+001.Restart system sehabis melakukan Perumahan :
+
+	systemctl restart emperor.uwsgi.service
+
+002. Debugging FLASK APP :
+
+	a. Tulis app.debug = True di file main.py
+	b. . bin/activate (aktifkan python venv)
+	c. python main.py 
+	
+003. SOKCET IO until update otomatis pembacaan Ensor terakhirsudo pip install flask-socketio
+
+004. Meresstart SSH untuk permit root login di lokasi : nano /etc/ssh/sshd_config
+		premitrootlogin yes
+		/etc/init.d/ssh restart
+
+005. pip install -r requirements.txt
+
+006. pip install flask-socketio
+
+007. pip install schedule
+
+Set up web app stack :
+1. sudo apt-get install build-essential
+2. sudo apt-get install libncurses5-dev libncursesw5-dev libreadline6-dev
+3. sudo apt-get install libbz2-dev libexpat1-dev liblzma-dev zlib1g-dev libsqlite3-dev libgdbm-dev tk8.5-dev
+4. sudo apt-get install python-dev
+5. sudo apt-get install libssl-dev openssl
+6. mkdir python-source
+7. cd python-source
+8. wget https://www.python.org/ftp/python/3.8.0/Python-3.8.0.tgz
+9. tar zxvf Python-3.8.0.tgz
+10. cd Python-3.8.0
+11. ./configure --prefix=/usr/local/opt/python-3.8.0
+12. make
+13. sudo make install
+14. /usr/local/opt/python-3.8.0/bin/python3.8 --version
+15. sudo su
+16. cd /var
+17. mkdir www
+18. cd www
+19. mkdir lab_app
+20. cd lab_app
+21. /usr/local/opt/python-3.8.0/bin/python3.8 -m venv .
+22. . bin/activate
+23. apt-get install nginx
+24. apt-get update
+25. COBA BUKA BROWSER 192.168.1.4
+26a. sudo apt-get install libffi-dev |TERUS BUILD ULANG PYTHONNYA
+
+26b. pip install flask
+
+27. vim hello.py
+----------------------------------------------------------------
+28. #script
+	from flask import Flask
+	app = Flask(__name__)
+	
+	@app.route("/")
+	def hello():
+		return "Hello Irsyad!";
+	
+	if __name__ == "__main__":
+		app.run(host='0.0.0.0', port=8080)
+----------------------------------------------------------------
+29. Press -> ESC
+30. :wq
+31. y
+32. Press -> Enter
+33. python hello.py
+34. COBA BUKA BROWSER 192.168.1.4:8080
+35. vim hello.py
+----------------------------------------------------------------
+36. #script
+	from flask import Flask
+	app = Flask(__name__)
+	
+	@app.route("/")
+	def hello():
+		return "Hello Irsyad!";
+		
+	@app.route("/example")
+	def example_route():
+		return "This is an example_route!";
+	
+	if __name__ == "__main__":
+		app.run(host='0.0.0.0', port=8080)
+----------------------------------------------------------------
+37. Press -> ESC
+38. :wq
+39. y
+40. Press -> Enter
+41. python hello.py
+42. COBA BUKA BROWSER 192.168.1.4:8080/example
+|TUTORIAL 42|
+43. pip install uwsgi
+44. rm /etc/nginx/sites-enabled/default
+45. nano lab_app_nginx.conf
+------------------------------------
+46.server {
+    listen      80;
+    server_name localhost;
+    charset     utf-8;
+    client_max_body_size 75M;
+
+    location /static {
+        root /var/www/lab_app/;
+    }
+
+    location / { try_files $uri @labapp; }
+    location @labapp {
+        include uwsgi_params;
+        uwsgi_pass unix:/var/www/lab_app/lab_app_uwsgi.sock;
+    }
+}
+-----------------------------------------
+47. save the file
+48. ln -s /var/www/lab_app/lab_app_nginx.conf /etc/nginx/conf.d/ (LINKING THE NEW CONFIG FILE
+#restart the nginx
+49. /etc/init.d/nginx restart
+50. nano lab_app_uwsgi.ini [CEK ULANG INI KALO ERRORKI]
+-----------------------------------------
+51.
+#script
+[uwsgi]
+#application's base folder
+base = /var/www/lab_app
+
+#python module to import
+app = hello
+module = %(app)
+
+home = %(base)
+pythonpath = %(base)
+
+#socket file's location
+socket = /var/www/lab_app/%n.sock
+
+#permissions for the socket file
+chmod-socket    = 666
+
+#the variable that holds a flask application inside the module imported at line #6
+callable = app
+
+#location of log files
+logto = /var/log/uwsgi/%n.log
+---------------------------------------
+52. mkdir /var/log/uwsgi
+53. bin/uwsgi --ini /var/www/lab_app/lab_app_uwsgi.ini (RUNNING UWSGI MANUALLY)[RECHECK THIS]
+54. nano /etc/systemd/system/emperor.uwsgi.service (SYSTEMD adalah lokasi konfigurasi untuk mengatur apa saja yang harus linux jalankan ketika boot up)
+55. -------------------------------------
+#script [RECHECK THIS : LECTURE 45]
+[Unit]
+Description=uWSGI Emperor
+After=syslog.target
+
+[Service]
+ExecStart=/var/www/lab_app/bin/uwsgi --ini /var/www/lab_app/lab_app_uwsgi.ini
+# Requires systemd version 211 or newer
+RuntimeDirectory=uwsgi
+Restart=always
+KillSignal=SIGQUIT
+Type=notify
+StandardError=syslog
+NotifyAccess=all
+
+[Install]
+WantedBy=multi-user.target
+--------------------------------------
+56. systemctl start emperor.uwsgi.service
+57. systemctl status emperor.uwsgi.service
+58. systemctl enable emperor.uwsgi.service (START THE UWSGI SERVICE AT BOOT UP)
+59. reboot terus check ulang apakah service sudah berjalan otomatis ketika Rpi dinyalakan ?
+
+60. #Installing SQLite3
+	-> sudo su
+	-> cd /var/www/lab_app
+	-> apt-get install sqlite3
+
+SAMPE SINI !!!
+
+61. #create sql file
+	-> sqlite3 sample.sql
+	-> .help
+62. # SQL Queries
+	begin;
+	create table temperatures (rDateTime datetime, sensorID text, temp numeric);
+	insert into temperatures values (datetime('now')," 1", 25);
+	commit;
+	select * from temperatures;
+	.exit
+63. mkdir static
+64. cd static
+65. mkdir css
+66. mkdir images
+67. nano a_static_file.html
+-------------------------------------
+68. #script
+<html>
+<head>
+<title>Static page</title>
+</head>
+<body>
+<h1>This is an example of a static page</h1>
+<p>Neat, isn’t it?</p>
+</body>
+</html>
+----------------------------------------
+69.save it
+70. download : "https://github.com/dhg/Skeleton/releases/download/2.0.4/Skeleton-2.0.4.zip"
+71. copy file css ke dalam lab_app/static/css
+72. copy file image ke dalam lab_app/static/image
+73. tambahkan css berikut ke a_static_file.html di bawah tag title:
+----------------------------------
+<!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- FONT
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="images/favicon.png">
+----------------------------------------------------------
+74./var/www/lab_app# mkdir templates
+75. nano hello.py
+76 ------------------------------
+from flask import Flask
+from flask import render_template
+
+app = Flask(__name__)
+app.debug = True
+
+@app.route("/")
+def hello():
+        return render_template('hello.html', message="Hello Irsyad")
+
+@app.route("/example")
+def example_route():
+        return "This is an example_route!";
+
+if __name__ == "__main__":
+        app.run(host='0.0.0.0', port=8080)
+-----------------------------------------------
+
+77. cd templates
+78. nano hello.html
+79. --------------------------------
+<html>
+<head>
+<meta charset="utf-8">
+<title>Static page</title>
+<!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- FONT
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="stylesheet" href="/static/css/normalize.css">
+  <link rel="stylesheet" href="/static/css/skeleton.css">
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="/static/images/favicon.png">
+</head>
+<body>
+<h1>{{ message }}</h1>
+</body>
+</html>
+------------------------------------
+80. root@raspberrypi:/var/www/lab_app# systemctl restart emperor.uwsgi.service
+81. Coba buka local ip address raspi di 192.168.1.16 (ip address Rpi bisa berubah-ubah)
+
+--DEBUGGING FLASK APP--
+82. . bin/activate
+83. python hello.py
+---GETTING STARTED WITH WEB APPLICATION---
+84. pip install rpi.gpio 
+85. sudo apt-get install git
+86. git clone https://github.com/adafruit/Adafruit_Python_DHT.git
+87. cd Adafruit_Python_DHT
+88. python setup.py install
+89. nano lab_app.py
+------------------------
+from flask import Flask, request, render_template
+import sys
+import Adafruit_DHT
+
+app = Flask(__name__)
+app.debug = True # Make this False if you are no longer debugging
+
+@app.route("/")
+def hello():
+    return "Hello World!"
+
+@app.route("/lab_temp")
+def lab_temp():
+        humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.AM2302, 17)
+        if humidity is not None and temperature is not None:
+                return render_template("lab_temp.html",temp=temperature,hum=humidity)
+        else:
+                return render_template("no_sensor.html")
+
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=8080)
+
+-------------------------
+90. nano lab_app_uwsgi.ini
+----------------------------------
+#Full path: /var/www/lab_app/lab_app_uwsgi.ini
+
+[uwsgi]
+#application's base folder
+base = /var/www/lab_app
+
+#python module to import
+app = lab_app
+module = %(app)
+
+home = %(base)
+pythonpath = %(base)
+
+#socket file's location
+socket = /var/www/lab_app/%n.sock
+
+#permissions for the socket file
+chmod-socket = 666
+
+#the variable that holds a flask application inside the module imported at line #6
+callable = app
+
+#location of log files
+logto = /var/log/uwsgi/%n.log
+
+----------------------------------
+91. systemctl restart emperor.uwsgi.service
+
+//CREATE A DATABASE TO STORE SENSOR DATA
+92. sqlite3 lab_app.db
+93a. begin;
+93b. create table temperatures (rDatetime datetime, sensorID text, temp numeric);
+94. insert into temperatures values (datetime(CURRENT_TIMESTAMP),"1",25);
+95. insert into temperatures values (datetime(CURRENT_TIMESTAMP),"1",25.20);
+96. commit;
+97. begin;
+98. create table humidities (rDatetime datetime, sensorID text, hum numeric);
+99. insert into humidities values (datetime(CURRENT_TIMESTAMP),"1",51);
+100. insert into humidities values (datetime(CURRENT_TIMESTAMP),"1",51.10);
+101. commit;
+102. select * from $tableName //untuk melihat isi data dari table db
+103. schema $tableName //untuk melihat struktur data dari table db
+104. copy file env_log.py ke directory lab_app
+105. python env_log.py
+106. sqlite3 lab_app.db
+107. select * from temperatures //untuk mengecek apakah data masuk ke database
+--SCHEDULING--
+108. crontab -e
+109. 2 //choose nano text editor
+110. --------------------------------------
+# cron adalah lib linux untuk mengatur perintah yang harus di eksekusi secara berulang dalam interval waktu tertentu
+# Edit this file to introduce tasks to be run by cron.
+#
+# Each task to run has to be defined through a single line
+# indicating with different fields when the task will be run
+# and what command to run for the task
+#
+# To define the time you can provide concrete values for
+# minute (m), hour (h), day of month (dom), month (mon),
+# and day of week (dow) or use '*' in these fields (for 'any').#
+# Notice that tasks will be started based on the cron's system
+# daemon's notion of time and timezones.
+#
+# Output of the crontab jobs (including errors) is sent through
+# email to the user the crontab file belongs to (unless redirected).
+#
+# For example, you can run a backup of all your user accounts
+# at 5 a.m every week with:
+# 0 5 * * 1 tar -zcf /var/backups/home.tgz /home/
+#
+# For more information see the manual pages of crontab(5) and cron(8)
+#
+# m h  dom mon dow   command
+*/1 * * * * /var/www/lab_app/bin/python /var/www/lab_app/env_log.py
+-----------------------------------------------------------------------------
+--Display database records in the browser - Python script--
+111. nano lab_app.py
+112. ----------------------------------------
+from flask import Flask, request, render_template
+import sys
+import Adafruit_DHT
+import sqlite3
+
+app = Flask(__name__)
+app.debug = True # Make this False if you are no longer debugging
+
+@app.route("/")
+def hello():
+    return "Hello World!"
+
+@app.route("/lab_temp")
+def lab_temp():
+	humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.AM2302, 17)
+	if humidity is not None and temperature is not None:
+		return render_template("lab_temp.html",temp=temperature,hum=humidity)
+	else:
+		return render_template("no_sensor.html")
+
+@app.route("/lab_env_db")
+def lab_env_db():
+	conn=sqlite3.connect('/var/www/lab_app/lab_app.db')
+	curs=conn.cursor()
+	curs.execute("SELECT * FROM temperatures")
+	temperatures = curs.fetchall()
+	curs.execute("SELECT * FROM humidities")
+	humidities = curs.fetchall()
+	conn.close()
+	return render_template("lab_env_db.html",temp=temperatures,hum=humidities)
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=8080)
+----------------------------------------------
+--Display database records - Template-- (Using Jinja2)
+113. copy lab_env_db.html ke dalam folder templates 
+114. systemctl restart emperor.uwsgi.service
+115. buka 192.168.1.16/lab_env_db
+--Section 9: Implement the date range selection feature---
+ Not a really important section
+116. Fungsi untuk debugging 100 baris terakhir melalui log :  tail -n100 /var/log/uwsgi/lab_app_uwsgi.log
+--URL querystring validation--
+117.ganti ke lab_app_v4.py
+118. systemctl restart emperor.uwsgi.service
+119. ganti ke lab_app_v5.py
+--bikin radio button menggunakan javascript--
+120. ganti ke lab_env_db_v2
+121. ganti ke lab_app_v6.py
+--using google charts--
+!!!. HOLD DULU AJAR NAGA, NONTON SAJA, mulai praktek di video ke : 71
+
+
+
+122. ganti ke lab_env_db_v3.html
+123. ganti ke lab_app_v7.py
+124. systemctl restart emperor.uwsgi.service
+--menggunakan javascript template untuk datepicker----
+125. 

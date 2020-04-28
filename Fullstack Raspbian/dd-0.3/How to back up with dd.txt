@@ -1,0 +1,1 @@
+dd if=\\?\Device\Harddisk3\Partition0 of=my.img bs=1M --progress

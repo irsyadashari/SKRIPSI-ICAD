@@ -1,0 +1,153 @@
+<!DOCTYPE HTML>    
+<html>
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
+            
+            <meta http-equiv="refresh" content="5">
+            <title>Fish Monitoring System</title>
+            
+            <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+            <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+            <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+            
+            
+            <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+            <script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
+            <script type="text/javascript" charset="utf-8">
+                $(document).ready(function(){
+                    namespace = '/home'; // change to an empty string to use the global namespace
+
+                // the socket.io documentation recommends sending an explicit package upon connection
+                // this is specially important when using the global namespace
+                var socket = io.connect('http://192.168.1.8:8080/home');
+                    
+                socket.on('connect', function() {
+                    socket.emit('my_event', {data: 'I\'m connected!'});
+                });
+            
+                socket.on('main_tank_temp', function(data){
+                    $('#mainTankTemp').html('<p>' +'Temperatur Akuarium : ' + data.mainTankTemp+' C'+'</p>') ;             
+                });
+          
+            });
+            </script>
+            
+        </head>
+
+        <h1 id="titleWeb" align="center">Monitoring Fish System</h1>
+        <a href="/logout" class="btn btn-primary btn-lg btn-block" role="button">LOGOUT</a></div>
+        <br/>
+        <br/>
+        <div class="container">
+
+        <div class="card-deck">
+
+          <div class="card">
+            <img src="/static/images/temperature.png" class="card-img-top" alt="...">
+            <div class="card-body">
+              <h5 class="card-title">Temperature Akuarium</h5>
+              <p id="mainTankTemp" class="card-text">Temperatur Air Akuarium : {{mainTankTemperature}} C</p>
+              <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+            </div>
+          </div>
+
+          <div class="card">
+            <img src="/static/images/temperature.png" class="card-img-top" alt="...">
+            <div class="card-body">
+              <h5 class="card-title">Temperatur Air Cadangan</h5>
+              <p class="card-text">Temperatur Air Cadangan : {{secondaryTankTemperature}} C</p>
+              <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+            </div>
+          </div>
+
+          <div class="card">
+            <img src="/static/images/waterLvlWhite.png" class="card-img-top" alt="...">
+            <div class="card-body">
+              <h5 class="card-title">Tinggi Air Akuarium</h5>
+              <p class="card-text">Tinggi Air Akuarium : {{mainTankWaterLvl}} cm</p>
+              <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+            </div>
+           </div>
+
+          <div class="card">
+            <img src="/static/images/waterLvlWhite.png" class="card-img-top" alt="...">
+             <div class="card-body">
+              <h5 class="card-title">Tinggi Air Cadangan</h5>
+              <p class="card-text">Tinggi Air Cadangan : {{secondaryTankWaterLvl}} cm</p>
+              <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+             </div>
+            </div>
+
+        </div>
+
+        <div class="card-deck">
+
+          <div class="card">
+            <img src="/static/images/waterPump.png" class="card-img-top" alt="...">
+             <div class="card-body">
+              <h5 class="card-title">Status Pompa Utama</h5>
+              <p>{{ pins[17].name }}
+                {% if pins[17].state == true %}
+                : <strong>off</strong></p>
+                {% else %}
+                : <strong>on</strong></p>
+                {% endif %}
+
+              <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+             </div>
+            </div>
+
+          <div class="card">
+            <img src="/static/images/waterPump.png" class="card-img-top" alt="Status Pompa Pengisap">
+             <div class="card-body">
+              <h5 class="card-title">Status Pompa Pengisap</h5>
+              <p>{{ pins[27].name }}
+                {% if pins[27].state == true %}
+                : <strong>off</strong></p>
+                {% else %}
+                : <strong>on</strong></p>
+                {% endif %}
+              <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+             </div>
+            </div>
+
+          <div class="card">
+            <img src="/static/images/waterPump.png" class="card-img-top" alt="Status Pompa Pengisi">
+             <div class="card-body">
+              <h5 class="card-title">Status Pompa Pengisi</h5>
+              <p>{{ pins[22].name }}
+                {% if pins[22].state == true %}
+                : <strong>off</strong></p>
+                {% else %}
+                : <strong>on</strong></p>
+                {% endif %}
+              <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+             </div>
+            </div>
+
+          <div class="card">
+            <img src="/static/images/lamp.png" class="card-img-top" alt="Status Lampu Aquarium">
+             <div class="card-body">
+              <h5 class="card-title">Status Lampu Aquarium</h5>
+              <p>{{ pins[23].name }}
+                {% if pins[23].state == true %}
+                : <strong>off</strong></p>
+                {% else %}
+                : <strong>on</strong></p>
+                {% endif %}
+              <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+             </div>
+            </div>
+
+        </div>
+
+
+        </div>
+
+
+
+
+
+    </html>

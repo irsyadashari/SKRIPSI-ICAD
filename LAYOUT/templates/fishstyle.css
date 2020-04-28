@@ -1,0 +1,25 @@
+@import url(https://fonts.googleapis.com/css?family=Roboto:300);
+
+#titleWeb {
+  text-align: center;
+  font-family: "Roboto", sans-serif;
+}
+
+/* Three image containers (use 25% for four, and 50% for two, etc) */
+.columnkolum{
+  margin: auto;
+  float: none ;
+  width: 25%;
+  padding: 15px;
+}
+
+/* Clear floats after image containers */
+.rowbaris::after{
+  content: "";
+  clear: both;
+  display: table;
+}
+
+
+
+
