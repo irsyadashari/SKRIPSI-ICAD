@@ -124,6 +124,10 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
+@app.route("/")
+def forwarding():
+    return redirect(url_for('login'))
+
 @app.route("/home")
 @login_required
 def main():
