@@ -15,7 +15,7 @@ ads = ADC.ADS1115(i2c)
 
 # Create single-ended input on channel 0
 #chan = AnalogIn(ads, ADS.P0)
-chan = AnalogIn(ads, ADC.P0)
+chan = AnalogIn(ads, ADC.P1)
 
 # Create differential input between channel 0 and 1
 #chan = AnalogIn(ads, ADS.P0, ADS.P1)

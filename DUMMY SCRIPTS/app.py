@@ -146,8 +146,9 @@ def main():
     var_mainTankTemperature = DSTemp.read_temp(device_file1)
     var_secondaryTankTemperature = DSTemp.read_temp(device_file2)
     
-#    hour, minutes = CurrentACS.get_battery_estimated_life(50,CurrentACS.get_current_values(1),20)
-    hour, minutes = CurrentACS.get_battery_estimated_life(50,4.187,20)
+    hour, minutes = CurrentACS.simulate_battery_usage()
+    
+#    hour, minutes = CurrentACS.get_battery_estimated_life(50,4.187,20)
     
     return render_template('home.html',mainTankWaterLvl = var_mainTankWaterLvl, secondaryTankWaterLvl = var_secondaryTankWaterLvl ,mainTankTemperature = var_mainTankTemperature, secondaryTankTemperature = var_secondaryTankTemperature ,**templateData, hour=str("%.0f" % hour), minutes=str("%.0f" % minutes), powerMode="Baterai")    
 
